@@ -20,32 +20,41 @@ echo ${bb9} > /dev/stderr
 for aa1 in ${bb9}
 do
     echo -n "<${aa1}> " > /dev/stderr
-done ; echo 
+done ; echo > /dev/stderr
 
-down0H=6.015    # 40 Ceies degree
-down0L=26.30    # 0 Ceies 
+down0H=6015     # 40 Ceies degree : 6.015 k
+down0L=26300    #  0 Ceies degree : 26.3  k
+targetH=0.481
+targetL=0.708
 for aa1 in ${bb9} ; do 
     for aa2 in ${bb9} ; do 
-        up=${aa1}
-        down1=${aa2}
-        down2H=`bc -l <<< "${down1}*${down0H}/(${down1}+${down0H})"`
-        down2L=`bc -l <<< "${down1}*${down0L}/(${down1}+${down0L})"`
-        splitH=`bc -l <<< "${down2H}/(${down2H}+${up})"`
-        splitL=`bc -l <<< "${down2L}/(${down2L}+${up})"`
-        #diffH=`bc -l <<< "(${splitH}-.481)"`
-        #diffL=`bc -l <<< "(${splitL}-.708)"`
-        diffH2=$(echo `bc -l <<< "(${splitH}-.481)^2 * 1000000"`|sed -e 's;\..*;;g')0
-        diffL2=$(echo `bc -l <<< "(${splitL}-.708)^2 * 1000000"`|sed -e 's;\..*;;g')0
-        diffF1=$(( ${diffH2} + ${diffL2} ))
-        diffF2=$(( ${diffH2} - ${diffL2} ))
-        diffK1=$(( ${diffF1} * ${diffF1} ))
-        diffK2=$(( ${diffF1} * ${diffF1} ))
-        echo "diffF1 : Rup , Rdown1 , RdownH, RdownL , splitH, splitL , diffH diffL , diffF1"
-        echo ${diffK2} ${up} ${down1}  ${down2H} ${down2L} ${splitH} ${splitL} ${diffH2}  ${diffL2} ${diffF1} ${diffF2} ${diffK1}  ${diffK2} 
+        Rup=${aa1}
+        Rdown1=${aa2}
+        Rdown2H=`bc -l <<< "${Rdown1}*${down0H}/(${Rdown1}+${down0H})"`
+        Rdown2L=`bc -l <<< "${Rdown1}*${down0L}/(${Rdown1}+${down0L})"`
+        VsplitH=`bc -l <<< "${Rdown2H}/(${Rdown2H}+${Rup})"`
+        VsplitL=`bc -l <<< "${Rdown2L}/(${Rdown2L}+${Rup})"`
+        VdiffH=$(printf "%8.5f" `bc -l <<< "sqrt((${VsplitH}-${targetH})^2)*100"`)
+        VdiffL=$(printf "%8.5f" `bc -l <<< "sqrt((${VsplitL}-${targetL})^2)*100"`)
+        diffH2=$(printf "%8.0f" `bc -l <<< "((${VsplitH}-${targetH})^2)*1000000"`)
+        diffL2=$(printf "%8.0f" `bc -l <<< "((${VsplitL}-${targetL})^2)*1000000"`)
+        test ${diffH2} -lt ${diffL2} \
+            && diffF1=$(( ${diffL2} - ${diffH2} )) \
+            || diffF1=$(( ${diffH2} - ${diffL2} ))
+        diffF2=$(( ${diffH2} + ${diffL2} ))
+        echo ${diffF1} ${diffF2} : Rup ${Rup} , Rdown1 ${Rdown1} , down0H ${down0H} Rdown2H ${Rdown2H} , \
+            down0L ${down0L} Rdown2L ${Rdown2L} : \
+            VsplitH ${VsplitH} VsplitL ${VsplitL} , \
+            VdiffH ${VdiffH}  VdiffL ${VdiffL} : \
+            diffH2 ${diffH2}  diffL2 ${diffL2} : \
+            diffF1 ${diffF1} diffF2 ${diffF2} 
     done
 done
+
+#cat 3.txt |grep -v ^diff |sort -n -k1 > 51.txt
+
 cat > /dev/stderr << EOF1
 
-cat 3.txt |grep -v ^diff |sort -n -k1 > 5.txt
+cat 3.txt |grep -v ^diff |sort -n -k2 > 52.txt
 
 EOF1
