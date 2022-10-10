@@ -611,15 +611,19 @@ for group in grouped:
     #row.append( c.getField("source") )                   # source
     cvv = c.getField("source") 
     if "" == cvv :
-        cvv = c.getField("source") 
+        cvv = c.getField("Source") 
     if "" == cvv :
         cvv = "Digikey-"                                  # default source
 
     partNumber = c.getField("PartNum") 
     if "" == partNumber :
+        partDesc = c.getField("PartNumber") 
+    if "" == partNumber :
         partNumber = "noPartNumber"
 
     partDesc = c.getField("PartDesc") 
+    if "" == partDesc :
+        partDesc = c.getField("PartDescription") 
     if "" == partDesc :
         partDesc = c.getField("partdesc") 
     if "" == partDesc :
@@ -642,10 +646,9 @@ for group in grouped:
 
     mfgNum = c.getField("MfgNum") 
     if "" == mfgNum :
-        mfgNum = c.getField("Mfg") 
+        mfgNum = c.getField("MfgNumber") 
     if "" == mfgNum :
         mfgNum = partNumber
-        #mfgNum = "no_Mfg_Info" 
 
     partValue = c.getValue()
 
